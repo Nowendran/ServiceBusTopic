@@ -3,30 +3,39 @@ using System.Globalization;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Azure.ServiceBus;
+using Microsoft.Azure.ServiceBus;  //Required to access azure services
 
 namespace ConsoleApp1
 {
     class Program
     {
-        // Connection String for the namespace can be obtained from the Azure portal under the 
-        // 'Shared Access policies' section.
-        const string ServiceBusConnectionString = "";
-        const string TopicName = "";
-        const string SubscriptionName = "";
+        // servicebus resource needs to be created on azure, and then on that service buse you creaate a topic and a subscription
+        //the following three lines stores the service bus stuff into variable
+        const string ServiceBusConnectionString = "Endpoint=sb://nowendran.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=WLg0pwDbMVKEXigdt5BfOQv+1Nvfj2LRGO/tBgeV5sI=";
+        const string TopicName = "nowen";
+        const string SubscriptionName = "bro";
+        
+        // uses the using statement 
+        // following variables are instances required to get or send data to the service bus
         static ISubscriptionClient _subscriptionClient;
         static ITopicClient _topicClient;
 
         static void Main(string[] args)
         {
-            //MainAsync().GetAwaiter().GetResult();
+            //following line sends messages to the service using the MainAsync (Refer to last 2 methods Method name is MainAsync)
+            MainAsync().GetAwaiter().GetResult();
+            // This recieves the messages using the method directly after this
             RecieveMainAsync().GetAwaiter().GetResult();
         }
 
         static async Task RecieveMainAsync()
         {
+            // this im assuming specifies which service bus/ Topic and subscription yourre connecting too on your azure account
+           
             _subscriptionClient = new SubscriptionClient(ServiceBusConnectionString, TopicName, SubscriptionName);
 
+
+            //i dont wanna explain this
             Console.WriteLine("======================================================");
             Console.WriteLine("Press ENTER key to exit after receiving all the messages.");
             Console.WriteLine("======================================================");
@@ -38,6 +47,7 @@ namespace ConsoleApp1
 
             await _subscriptionClient.CloseAsync();
         }
+        //message handler
         static void RegisterOnMessageHandlerAndReceiveMessages()
         {
             // Configure the message handler options in terms of exception handling, number of concurrent messages to deliver, etc.
@@ -55,7 +65,9 @@ namespace ConsoleApp1
             // Register the function that processes messages.
             _subscriptionClient.RegisterMessageHandler(ProcessMessagesAsync, messageHandlerOptions);
         }
-
+        //this basically processes the message
+        //the way it is displayed in your app and encoding it from azure is done here
+    
         static async Task ProcessMessagesAsync(Message message, CancellationToken token)
         {
             // Process the message.
